@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#17324d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Outil Absences">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>Outil Absences</title>
+<style>
+:root{--navy:#17324d;--blue:#2f6f9f;--bg:#f4f6f8;--card:#fff;--text:#17202a;--muted:#66717d;--line:#d9e0e6;--danger:#b42318;--ok:#18794e}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif}
+header{background:var(--navy);color:#fff;padding:calc(18px + env(safe-area-inset-top)) 18px 18px;position:sticky;top:0;z-index:10}
+header h1{margin:0;font-size:22px}header p{margin:5px 0 0;opacity:.82;font-size:13px}
+main{max-width:720px;margin:auto;padding:16px 14px 90px}.tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:14px}.tabs button{border:0;border-radius:12px;padding:11px 5px;background:#e7edf2;color:#28465f;font-weight:700;font-size:12px}.tabs button.active{background:var(--navy);color:#fff}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:17px;margin-bottom:13px;box-shadow:0 2px 8px #0000000b}
+h2{font-size:19px;margin:0 0 14px}.grid{display:grid;gap:12px}.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+label{display:block;font-size:12px;font-weight:700;color:#425466;margin-bottom:5px}input,select,textarea{width:100%;border:1px solid #c9d2da;border-radius:10px;padding:12px;font:inherit;background:#fff;color:var(--text)}textarea{min-height:90px;resize:vertical}
+input:focus,select:focus,textarea:focus{outline:2px solid #9dc4e2;border-color:var(--blue)}
+button.primary,button.secondary,button.danger{border:0;border-radius:11px;padding:12px 14px;font-weight:800;font-size:14px}button.primary{background:var(--navy);color:#fff}button.secondary{background:#e9eef2;color:#26445d}button.danger{background:#fbe9e7;color:var(--danger)}
+.actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}.actions.one{grid-template-columns:1fr}
+.notice{padding:11px 12px;border-radius:10px;background:#f0f5f8;color:#455a6d;font-size:12px;line-height:1.45}.warning{background:#fff4e5;color:#7a4b00}.ok{background:#eaf7f0;color:#166b46}
+.hidden{display:none!important}.small{font-size:12px;color:var(--muted)}.preview{white-space:pre-wrap;background:#f7f8fa;border:1px solid var(--line);border-radius:10px;padding:12px;font-size:13px;line-height:1.45}
+.item{padding:12px 0;border-bottom:1px solid var(--line)}.item:last-child{border-bottom:0}.item b{font-size:14px}.item span{display:block;color:var(--muted);font-size:12px;margin-top:3px}
+.settings-grid{display:grid;gap:10px}.pill{display:inline-block;padding:4px 8px;border-radius:20px;background:#edf2f6;color:#38536a;font-size:11px;font-weight:700}
+footer{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding:9px 14px calc(9px + env(safe-area-inset-bottom));font-size:11px;color:var(--muted);text-align:center}
+@media(min-width:600px){main{padding-top:22px}.tabs button{font-size:13px}}
+</style>
+</head>
+<body>
+<header><h1>Outil Absences</h1><p>Absences · véhicules · historique · paramètres</p></header>
+<main>
+<div class="tabs">
+<button data-tab="absence" class="active">Absence</button>
+<button data-tab="vehicle">Véhicule</button>
+<button data-tab="history">Historique</button>
+<button data-tab="settings">Paramètres</button>
+</div>
+
+<section id="absence" class="tab">
+<div class="card"><h2>Demande d'absence</h2>
+<div class="grid">
+<div><label>Nom / Prénom</label><select id="aCollab"></select></div>
+<div><label>Motif</label><select id="aMotif"></select></div>
+<div id="appointmentFields">
+<div class="row2">
+<div><label>Date du rendez-vous</label><input id="aDate" type="date"></div>
+<div><label>Heure du rendez-vous</label><input id="aTime" type="time"></div>
+</div>
+<div class="row2">
+<div><label>Durée autorisée</label><input id="aDuration" type="time" readonly></div>
+<div><label>Heure de départ</label><input id="aDeparture" type="time" readonly></div>
+</div>
+</div>
+<div id="illnessFields" class="hidden">
+<label>Période de maladie</label>
+<div class="row2"><input id="aStart" type="date"><input id="aEnd" type="date"></div>
+</div>
+<div id="certificateFields" class="hidden">
+<label>Certificat médical</label><input id="aCert" type="file" accept=".pdf,image/*,.jpg,.jpeg,.png">
+<div id="certName" class="small">Aucun certificat sélectionné</div>
+</div>
+<div><label>Commentaire</label><textarea id="aComment" placeholder="Facultatif"></textarea></div>
+<div class="notice">Règle reprise du fichier Excel : pour un rendez-vous, la durée autorisée est paramétrable. Si le départ calculé est avant 07:30, le message utilise l'heure du rendez-vous.</div>
+</div></div>
+<div class="card"><h2>Destinataires</h2>
+<div class="grid">
+<div><label>Destinataire principal</label><select id="aRecipient"></select></div>
+<div><label>CC</label><input id="aCc" type="text"></div>
+<label style="display:flex;align-items:center;gap:8px;margin:0"><input id="aSubstitute" type="checkbox" style="width:auto"> Utiliser la suppléance</label>
+</div></div>
+<div class="card"><h2>Aperçu du message</h2><div id="aPreview" class="preview">Remplissez le formulaire pour générer le message.</div>
+<div class="actions"><button class="secondary" onclick="copyAbsence()">Copier</button><button class="primary" onclick="sendAbsence()">Préparer l'e-mail</button></div></div>
+</section>
+
+<section id="vehicle" class="tab hidden">
+<div class="card"><h2>Demande de véhicule de remplacement</h2>
+<div class="grid">
+<div><label>Nom / Prénom</label><select id="vCollab"></select></div>
+<div><label>Motif</label><select id="vMotif"></select></div>
+<div><label>Date ou période</label><input id="vDate" type="text" placeholder="ex. 02.10.2026 ou 02.10.2026 - 05.10.2026"></div>
+<div><label>Marque & Modèle</label><input id="vModel"></div>
+<div><label>Plaque</label><input id="vPlate" autocapitalize="characters"></div>
+</div></div>
+<div class="card"><h2>Destinataires</h2>
+<div class="grid"><div><label>Destinataire principal</label><input id="vRecipient" readonly></div><div><label>CC</label><input id="vCc" readonly></div></div></div>
+<div class="card"><h2>Aperçu du message</h2><div id="vPreview" class="preview">Remplissez le formulaire pour générer le message.</div>
+<div class="actions"><button class="secondary" onclick="copyVehicle()">Copier</button><button class="primary" onclick="sendVehicle()">Préparer l'e-mail</button></div></div>
+</section>
+
+<section id="history" class="tab hidden">
+<div class="card"><h2>Historique</h2><div id="historyList"></div>
+<div class="actions"><button class="secondary" onclick="exportData()">Exporter les données</button><button class="danger" onclick="clearHistory()">Effacer l'historique</button></div></div>
+</section>
+
+<section id="settings" class="tab hidden">
+<div class="card"><h2>Paramètres absences</h2><div class="settings-grid">
+<div><label>Destinataire principal</label><input id="sRecipient"></div>
+<div><label>Copie (CC)</label><input id="sCc"></div>
+<div><label>Suppléance</label><input id="sSubstitute"></div>
+<div><label>Durée autorisée</label><input id="sDuration" type="time"></div>
+</div></div>
+<div class="card"><h2>Collaborateurs</h2><textarea id="sCollaborators" placeholder="Un collaborateur par ligne"></textarea></div>
+<div class="card"><h2>Motifs d'absence</h2><textarea id="sMotifs" placeholder="Un motif par ligne"></textarea></div>
+<div class="card"><h2>Paramètres véhicules</h2><div class="settings-grid">
+<div><label>Destinataire principal</label><input id="sVRecipient"></div><div><label>Copie (CC)</label><input id="sVCc"></div>
+</div><label style="margin-top:10px">Motifs véhicule</label><textarea id="sVMotifs"></textarea></div>
+<div class="card"><h2>Sauvegarde</h2><div class="actions"><button class="secondary" onclick="exportData()">Exporter</button><button class="secondary" onclick="document.getElementById('importFile').click()">Importer</button></div><input id="importFile" type="file" accept=".json" class="hidden"></div>
+<div class="actions one"><button class="primary" onclick="saveSettings()">Enregistrer les paramètres</button></div>
+</section>
+</main>
+<footer>Version PWA · données conservées sur cet appareil</footer>
+
+<script>
+const defaults={
+recipient:"martial.fracheboud@bazg.admin.ch",
+cc:"jerome.courtais@bazg.admin.ch;rui.dealmeida@bazg.admin.ch;sady.fuambi@bazg.admin.ch;aurelien.krummenacher@bazg.admin.ch",
+substitute:"marie-paule.beguelin@bazg.admin.ch",duration:"02:00",
+collaborators:["Krummenacher Aurélien","Courtais Jérôme","Fuambi Sady","De Almeida Rui"],
+motifs:["Maladie","Rendez-vous spécialiste","Rendez-vous administratif"],
+vRecipient:"mobilite.campus-vsg@richemont.com",vCc:"vsg-campus.hospitality@richemont.com",
+vMotifs:["Véhicule déjà stationné sur le site","Véhicule utilisé pour une période"]
+};
+let cfg=JSON.parse(localStorage.getItem("oa_cfg")||"null")||defaults;
+let history=JSON.parse(localStorage.getItem("oa_history")||"[]");
+const $=id=>document.getElementById(id);
+function opts(el,arr,placeholder="Sélectionner…"){el.innerHTML=`<option value="">${placeholder}</option>`+arr.map(x=>`<option>${escapeHtml(x)}</option>`).join("")}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+function populate(){
+opts($("aCollab"),cfg.collaborators);opts($("vCollab"),cfg.collaborators);opts($("aMotif"),cfg.motifs);opts($("vMotif"),cfg.vMotifs);
+$("aDuration").value=cfg.duration;$("aCc").value=cfg.cc;$("vRecipient").value=cfg.vRecipient;$("vCc").value=cfg.vCc;
+$("sRecipient").value=cfg.recipient;$("sCc").value=cfg.cc;$("sSubstitute").value=cfg.substitute;$("sDuration").value=cfg.duration;
+$("sCollaborators").value=cfg.collaborators.join("\n");$("sMotifs").value=cfg.motifs.join("\n");$("sVRecipient").value=cfg.vRecipient;$("sVCc").value=cfg.vCc;$("sVMotifs").value=cfg.vMotifs.join("\n");
+}
+function timeToMin(v){if(!v)return null;let [h,m]=v.split(":").map(Number);return h*60+m}
+function minToTime(n){n=(n+1440)%1440;return String(Math.floor(n/60)).padStart(2,"0")+":"+String(n%60).padStart(2,"0")}
+function isIllness(){return $("aMotif").value==="Maladie"}
+function updateAbsenceUI(){
+let ill=isIllness();$("appointmentFields").classList.toggle("hidden",ill);$("illnessFields").classList.toggle("hidden",!ill);$("certificateFields").classList.toggle("hidden",!ill);
+if(ill){$("aDate").value="";$("aTime").value="";$("aDeparture").value=""}
+updateAbsencePreview()
+}
+function updateDeparture(){let t=timeToMin($("aTime").value),d=timeToMin(cfg.duration);$("aDeparture").value=(t!=null&&d!=null)?minToTime(t-d):"";updateAbsencePreview()}
+function absenceText(){
+let name=$("aCollab").value,motif=$("aMotif").value;
+if(!name||!motif)return "";
+let subject="Absence - "+name;
+let lines=["Bonjour,",""];
+if(isIllness()){
+ let s=$("aStart").value,e=$("aEnd").value;
+ let period=s&&e?formatDate(s)+" - "+formatDate(e):"[période de maladie]";
+ lines.push("Je vous informe de la maladie suivante : "+period+".");
+}else{
+ let date=$("aDate").value?formatDate($("aDate").value):"[date]";
+ let rdv=$("aTime").value||"[heure]";
+ let dep=$("aDeparture").value;
+ let timing=(dep && timeToMin(dep)<450)?rdv:dep;
+ lines.push("Je vous informe de mon "+motif.toLowerCase()+" prévu le "+date+" à "+timing+".");
+ if(dep) lines.push("Heure de départ : "+dep+".");
+}
+if($("aComment").value.trim()) lines.push("",$("aComment").value.trim());
+lines.push("","Meilleures salutations","",name);
+return {subject,body:lines.join("\n")}
+}
+function updateAbsencePreview(){let x=absenceText();$("aPreview").textContent=x?x.body:"Remplissez le formulaire pour générer le message."}
+function vehicleText(){
+let name=$("vCollab").value,motif=$("vMotif").value,date=$("vDate").value.trim(),model=$("vModel").value.trim(),plate=$("vPlate").value.trim().toUpperCase();
+if(!name||!motif)return "";
+let subject="Véhicule de remplacement - "+motif;
+let first=motif==="Véhicule déjà stationné sur le site"?
+"Merci de prendre note que j’utilise aujourd’hui exceptionnellement un véhicule de remplacement, déjà stationné sur le site.":
+"Merci de prendre note que je vais utiliser exceptionnellement un véhicule de remplacement pour la période du : "+(date||"[date / période]")+".";
+let body=["Bonjour,","",first,"","Marque et modèle : "+(model||"[à compléter]"),"Plaque : "+(plate||"[à compléter]"),"","Étant externe, je ne dispose pas d’un accès à FairMove me permettant d’enregistrer un véhicule.","","En vous remerciant d’aviser la sécurité en cas d’éventuel contrôle et de m’envoyer une confirmation.","","Meilleures salutations","",name].join("\n");
+return {subject,body}
+}
+function updateVehiclePreview(){$("vPreview").textContent=vehicleText()?.body||"Remplissez le formulaire pour générer le message."}
+function formatDate(v){if(!v)return "";let d=new Date(v+"T00:00:00");return String(d.getDate()).padStart(2,"0")+"."+String(d.getMonth()+1).padStart(2,"0")+"."+d.getFullYear()}
+function recipient(){return $("aSubstitute").checked?cfg.substitute:cfg.recipient}
+function sendMail(to,cc,data,kind){
+if(!data){alert("Veuillez compléter les champs obligatoires.");return}
+history.unshift({when:new Date().toISOString(),kind,name:kind==="absence"?$("aCollab").value:$("vCollab").value,subject:data.subject,body:data.body,status:"Préparé"});
+localStorage.setItem("oa_history",JSON.stringify(history));renderHistory();
+const url="mailto:"+encodeURIComponent(to)+"?cc="+encodeURIComponent(cc)+"&subject="+encodeURIComponent(data.subject)+"&body="+encodeURIComponent(data.body);
+location.href=url;
+}
+function sendAbsence(){sendMail(recipient(),$("aCc").value,absenceText(),"absence")}
+function sendVehicle(){sendMail(cfg.vRecipient,cfg.vCc,vehicleText(),"vehicle")}
+async function copyText(t){try{await navigator.clipboard.writeText(t);alert("Message copié.");}catch(e){alert("Copie impossible sur ce navigateur.")}}
+function copyAbsence(){let x=absenceText();if(x)copyText(x.body)}
+function copyVehicle(){let x=vehicleText();if(x)copyText(x.body)}
+function renderHistory(){
+let el=$("historyList");if(!history.length){el.innerHTML='<div class="small">Aucun enregistrement.</div>';return}
+el.innerHTML=history.map((h,i)=>`<div class="item"><b>${escapeHtml(h.name)} <span class="pill">${h.kind==="absence"?"Absence":"Véhicule"}</span></b><span>${new Date(h.when).toLocaleString("fr-CH")} · ${escapeHtml(h.subject)}</span><span>${escapeHtml(h.status)}</span></div>`).join("")
+}
+function clearHistory(){if(confirm("Effacer tout l’historique de cet appareil ?")){history=[];localStorage.setItem("oa_history","[]");renderHistory()}}
+function exportData(){let data={version:1,config:cfg,history};let blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});let a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="outil-absences-sauvegarde.json";a.click();URL.revokeObjectURL(a.href)}
+$("importFile").addEventListener("change",async e=>{let f=e.target.files[0];if(!f)return;try{let d=JSON.parse(await f.text());if(d.config)cfg=d.config;if(Array.isArray(d.history))history=d.history;localStorage.setItem("oa_cfg",JSON.stringify(cfg));localStorage.setItem("oa_history",JSON.stringify(history));populate();renderHistory();alert("Sauvegarde importée.")}catch(err){alert("Fichier de sauvegarde invalide.")}})
+function saveSettings(){
+cfg={recipient:$("sRecipient").value.trim(),cc:$("sCc").value.trim(),substitute:$("sSubstitute").value.trim(),duration:$("sDuration").value||"02:00",collaborators:$("sCollaborators").value.split("\n").map(x=>x.trim()).filter(Boolean),motifs:$("sMotifs").value.split("\n").map(x=>x.trim()).filter(Boolean),vRecipient:$("sVRecipient").value.trim(),vCc:$("sVCc").value.trim(),vMotifs:$("sVMotifs").value.split("\n").map(x=>x.trim()).filter(Boolean)};
+localStorage.setItem("oa_cfg",JSON.stringify(cfg));populate();alert("Paramètres enregistrés.");updateAbsenceUI();updateVehiclePreview()
+}
+document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("active"));document.querySelectorAll(".tab").forEach(x=>x.classList.add("hidden"));b.classList.add("active");$(b.dataset.tab).classList.remove("hidden");if(b.dataset.tab==="history")renderHistory()});
+["aCollab","aMotif","aDate","aTime","aStart","aEnd","aComment","aSubstitute"].forEach(id=>$(id).addEventListener("input",()=>{if(id==="aMotif")updateAbsenceUI();else if(id==="aTime")updateDeparture();else updateAbsencePreview()}));
+$("aMotif").addEventListener("change",updateAbsenceUI);$("aTime").addEventListener("change",updateDeparture);
+$("aCert").addEventListener("change",()=>{$("certName").textContent=$("aCert").files[0]?.name||"Aucun certificat sélectionné"});
+["vCollab","vMotif","vDate","vModel","vPlate"].forEach(id=>$(id).addEventListener("input",updateVehiclePreview));
+populate();renderHistory();updateAbsenceUI();updateVehiclePreview();
+if("serviceWorker" in navigator)window.addEventListener("load",()=>navigator.serviceWorker.register("service-worker.js"));
+</script>
+</body>
+</html>
