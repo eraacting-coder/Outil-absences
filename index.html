@@ -64,11 +64,11 @@ footer{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px sol
 <div id="certName" class="small">Aucun certificat sélectionné</div>
 </div>
 <div><label>Commentaire</label><textarea id="aComment" placeholder="Facultatif"></textarea></div>
-<div class="notice">Règle reprise du fichier Excel : pour un rendez-vous, la durée autorisée est paramétrable. Si le départ calculé est avant 07:30, le message utilise l'heure du rendez-vous.</div>
+<div class="notice">Règle reprise du fichier Excel : pour un rendez-vous, la durée autorisée est paramétrable. Si le départ calculé est avant 07:45, le message utilise l'heure du rendez-vous.</div>
 </div></div>
 <div class="card"><h2>Destinataires</h2>
 <div class="grid">
-<div><label>Destinataire principal</label><select id="aRecipient"></select></div>
+<div><label>Responsable</label><input id="aRecipient" type="text" readonly></div>
 <div><label>CC</label><input id="aCc" type="text"></div>
 <label style="display:flex;align-items:center;gap:8px;margin:0"><input id="aSubstitute" type="checkbox" style="width:auto"> Utiliser la suppléance</label>
 </div></div>
@@ -131,7 +131,7 @@ function opts(el,arr,placeholder="Sélectionner…"){el.innerHTML=`<option value
 function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
 function populate(){
 opts($("aCollab"),cfg.collaborators);opts($("vCollab"),cfg.collaborators);opts($("aMotif"),cfg.motifs);opts($("vMotif"),cfg.vMotifs);
-$("aDuration").value=cfg.duration;$("aCc").value=cfg.cc;$("vRecipient").value=cfg.vRecipient;$("vCc").value=cfg.vCc;
+$("aDuration").value=cfg.duration;$("aRecipient").value=cfg.recipient;$("aCc").value=cfg.cc;$("vRecipient").value=cfg.vRecipient;$("vCc").value=cfg.vCc;
 $("sRecipient").value=cfg.recipient;$("sCc").value=cfg.cc;$("sSubstitute").value=cfg.substitute;$("sDuration").value=cfg.duration;
 $("sCollaborators").value=cfg.collaborators.join("\n");$("sMotifs").value=cfg.motifs.join("\n");$("sVRecipient").value=cfg.vRecipient;$("sVCc").value=cfg.vCc;$("sVMotifs").value=cfg.vMotifs.join("\n");
 }
@@ -157,7 +157,7 @@ if(isIllness()){
  let date=$("aDate").value?formatDate($("aDate").value):"[date]";
  let rdv=$("aTime").value||"[heure]";
  let dep=$("aDeparture").value;
- let timing=(dep && timeToMin(dep)<450)?rdv:dep;
+ let timing=(dep && timeToMin(dep)<465)?rdv:dep;
  lines.push("Je vous informe de mon "+motif.toLowerCase()+" prévu le "+date+" à "+timing+".");
  if(dep) lines.push("Heure de départ : "+dep+".");
 }
