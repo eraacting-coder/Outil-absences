@@ -1,22 +1,10 @@
-# Outil Absences — version 3 du cache PWA
+# Outil Absences PWA v5
 
-Cette version contient les corrections suivantes :
+Correction de la règle de rédaction des rendez-vous.
 
-- Règle de rendez-vous : si l'heure de départ calculée est avant 07:45, l'e-mail utilise l'heure du rendez-vous.
-- Le responsable est affiché directement dans le formulaire d'absence.
-- Service Worker v3 : ancien cache supprimé automatiquement.
-- La page principale utilise d'abord le réseau afin que les mises à jour GitHub Pages soient prises en compte.
+- Si l’heure de départ calculée est **avant 07:45** :
+  `Je vous informe de mon rendez-vous spécialiste prévu le 06.10.2026. Heure du rendez-vous 07:00.`
+- Si l’heure de départ calculée est **à 07:45 ou après** :
+  `Je vous informe de mon rendez-vous spécialiste prévu le 06.10.2026 à 07:45. Heure de départ : 07:45.`
 
-## Installation GitHub Pages
-
-Copier tous les fichiers du dossier dans le dépôt GitHub Pages et remplacer les anciens fichiers.
-
-Fichiers à conserver :
-- index.html
-- manifest.json
-- service-worker.js
-- icon-180.png
-- icon-192.png
-- icon-512.png
-
-Après publication, ouvrir une fois le site dans Safari. Si l'ancienne version apparaît encore, fermer complètement Safari puis rouvrir le site.
+Le Service Worker passe en cache v5 pour forcer la prise en compte de la nouvelle logique.
