@@ -157,9 +157,11 @@ if(isIllness()){
  let date=$("aDate").value?formatDate($("aDate").value):"[date]";
  let rdv=$("aTime").value||"[heure]";
  let dep=$("aDeparture").value;
- let timing=(dep && timeToMin(dep)<465)?rdv:dep;
+ // Règle métier : si l'heure de départ est avant 07:45,
+ // le message doit indiquer l'heure du rendez-vous, et non l'heure de départ.
+ let useAppointmentTime = !!dep && timeToMin(dep) < 465;
+ let timing = useAppointmentTime ? rdv : dep;
  lines.push("Je vous informe de mon "+motif.toLowerCase()+" prévu le "+date+" à "+timing+".");
- if(dep) lines.push("Heure de départ : "+dep+".");
 }
 if($("aComment").value.trim()) lines.push("",$("aComment").value.trim());
 lines.push("","Meilleures salutations","",name);

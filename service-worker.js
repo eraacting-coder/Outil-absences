@@ -1,4 +1,4 @@
-const CACHE = "outil-absences-v3";
+const CACHE = "outil-absences-v4";
 const ASSETS = [
   "./",
   "./index.html",
