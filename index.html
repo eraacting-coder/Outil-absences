@@ -157,14 +157,16 @@ if(isIllness()){
  let date=$("aDate").value?formatDate($("aDate").value):"[date]";
  let rdv=$("aTime").value||"[heure]";
  let dep=$("aDeparture").value;
- // Règle métier : si l'heure de départ est avant 08:30,
- // le message indique l'heure du rendez-vous et ne mentionne pas l'heure de départ.
- // À partir de 08:30, le message indique l'heure de départ et la précise séparément.
- let useAppointmentTime = !!dep && timeToMin(dep) < 510;
+ // Règle métier : avant 10:30, on indique l'heure du rendez-vous.
+ // À partir de 10:30, on indique uniquement l'heure de départ.
+ // Dans les deux cas, l'information horaire est placée sur une nouvelle ligne.
+ let useAppointmentTime = timeToMin(rdv) < 630;
  if (useAppointmentTime) {
-   lines.push("Je vous informe de mon "+motif.toLowerCase()+" prévu le "+date+". Heure du rendez-vous "+rdv+".");
+   lines.push("Je vous informe de mon "+motif.toLowerCase()+" prévu le "+date+".");
+   lines.push("Heure du rendez-vous "+rdv+".");
  } else {
-   lines.push("Je vous informe de mon "+motif.toLowerCase()+" prévu le "+date+" à "+dep+". Heure de départ : "+dep+".");
+   lines.push("Je vous informe de mon "+motif.toLowerCase()+" prévu le "+date+".");
+   lines.push("Heure de départ : "+dep+".");
  }
 }
 if($("aComment").value.trim()) lines.push("",$("aComment").value.trim());
