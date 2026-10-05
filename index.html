@@ -64,7 +64,7 @@ footer{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px sol
 <div id="certName" class="small">Aucun certificat sélectionné</div>
 </div>
 <div><label>Commentaire</label><textarea id="aComment" placeholder="Facultatif"></textarea></div>
-<div class="notice">Règle reprise du fichier Excel : pour un rendez-vous, la durée autorisée est paramétrable. Si le départ calculé est avant 07:45, le message utilise l'heure du rendez-vous.</div>
+<div class="notice">Règle reprise du fichier Excel : pour un rendez-vous, la durée autorisée est paramétrable. Si le départ calculé est avant 08:30, le message indique l'heure du rendez-vous ; à partir de 08:30, il indique l'heure de départ.</div>
 </div></div>
 <div class="card"><h2>Destinataires</h2>
 <div class="grid">
@@ -157,11 +157,15 @@ if(isIllness()){
  let date=$("aDate").value?formatDate($("aDate").value):"[date]";
  let rdv=$("aTime").value||"[heure]";
  let dep=$("aDeparture").value;
- // Règle métier : si l'heure de départ est avant 07:45,
- // le message doit indiquer l'heure du rendez-vous, et non l'heure de départ.
- let useAppointmentTime = !!dep && timeToMin(dep) < 465;
- let timing = useAppointmentTime ? rdv : dep;
- lines.push("Je vous informe de mon "+motif.toLowerCase()+" prévu le "+date+" à "+timing+".");
+ // Règle métier : si l'heure de départ est avant 08:30,
+ // le message indique l'heure du rendez-vous et ne mentionne pas l'heure de départ.
+ // À partir de 08:30, le message indique l'heure de départ et la précise séparément.
+ let useAppointmentTime = !!dep && timeToMin(dep) < 510;
+ if (useAppointmentTime) {
+   lines.push("Je vous informe de mon "+motif.toLowerCase()+" prévu le "+date+". Heure du rendez-vous "+rdv+".");
+ } else {
+   lines.push("Je vous informe de mon "+motif.toLowerCase()+" prévu le "+date+" à "+dep+". Heure de départ : "+dep+".");
+ }
 }
 if($("aComment").value.trim()) lines.push("",$("aComment").value.trim());
 lines.push("","Meilleures salutations","",name);
