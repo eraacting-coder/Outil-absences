@@ -12,3 +12,6 @@ Version 7 : règle rendez-vous 10:30. Avant 10:30, affichage « Heure du rendez-
 
 
 Version 8 : conversion automatique des listes d’adresses séparées par des points-virgules en listes séparées par des virgules lors de la préparation du mail, pour compatibilité iOS. Les paramètres existants peuvent rester inchangés. Cache PWA v8.
+
+
+Version 9 : remplace le motif « Rendez-vous administratif » par « Congé » (migration automatique des paramètres existants). Le motif Congé affiche une période de congé et le choix « Vacances » / « Heures mobiles ». Le mail est adapté pour une date unique ou une période, puis indique le compte utilisé. Les autres fonctions de la v8 sont conservées. Cache PWA v9.

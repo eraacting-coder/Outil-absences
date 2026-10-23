@@ -56,8 +56,9 @@ footer{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px sol
 </div>
 </div>
 <div id="illnessFields" class="hidden">
-<label>Période de maladie</label>
+<label id="periodLabel">Période de maladie</label>
 <div class="row2"><input id="aStart" type="date"><input id="aEnd" type="date"></div>
+<div id="accountField" class="hidden"><label for="aAccount">Compte utilisé</label><select id="aAccount"><option value="">Sélectionner…</option><option>Vacances</option><option>Heures mobiles</option></select></div>
 </div>
 <div id="certificateFields" class="hidden">
 <label>Certificat médical</label><input id="aCert" type="file" accept=".pdf,image/*,.jpg,.jpeg,.png">
@@ -112,7 +113,7 @@ footer{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px sol
 <div class="actions one"><button class="primary" onclick="saveSettings()">Enregistrer les paramètres</button></div>
 </section>
 </main>
-<footer>Version PWA · données conservées sur cet appareil</footer>
+<footer>Version PWA v9 · données conservées sur cet appareil</footer>
 
 <script>
 const defaults={
@@ -120,11 +121,14 @@ recipient:"martial.fracheboud@bazg.admin.ch",
 cc:"jerome.courtais@bazg.admin.ch;rui.dealmeida@bazg.admin.ch;sady.fuambi@bazg.admin.ch;aurelien.krummenacher@bazg.admin.ch",
 substitute:"marie-paule.beguelin@bazg.admin.ch",duration:"02:00",
 collaborators:["Krummenacher Aurélien","Courtais Jérôme","Fuambi Sady","De Almeida Rui"],
-motifs:["Maladie","Rendez-vous spécialiste","Rendez-vous administratif"],
+motifs:["Maladie","Rendez-vous spécialiste","Congé"],
 vRecipient:"mobilite.campus-vsg@richemont.com",vCc:"vsg-campus.hospitality@richemont.com",
 vMotifs:["Véhicule déjà stationné sur le site","Véhicule utilisé pour une période"]
 };
 let cfg=JSON.parse(localStorage.getItem("oa_cfg")||"null")||defaults;
+// Migration douce des paramètres existants : remplace l'ancien motif sans toucher aux autres réglages.
+if(Array.isArray(cfg.motifs)) cfg.motifs=cfg.motifs.map(m=>m==="Rendez-vous administratif"?"Congé":m);
+if(!cfg.motifs || !cfg.motifs.length) cfg.motifs=[...defaults.motifs];
 let history=JSON.parse(localStorage.getItem("oa_history")||"[]");
 const $=id=>document.getElementById(id);
 function opts(el,arr,placeholder="Sélectionner…"){el.innerHTML=`<option value="">${placeholder}</option>`+arr.map(x=>`<option>${escapeHtml(x)}</option>`).join("")}
@@ -138,9 +142,16 @@ $("sCollaborators").value=cfg.collaborators.join("\n");$("sMotifs").value=cfg.mo
 function timeToMin(v){if(!v)return null;let [h,m]=v.split(":").map(Number);return h*60+m}
 function minToTime(n){n=(n+1440)%1440;return String(Math.floor(n/60)).padStart(2,"0")+":"+String(n%60).padStart(2,"0")}
 function isIllness(){return $("aMotif").value==="Maladie"}
+function isLeave(){return $("aMotif").value==="Congé"}
+function usesPeriod(){return isIllness()||isLeave()}
 function updateAbsenceUI(){
-let ill=isIllness();$("appointmentFields").classList.toggle("hidden",ill);$("illnessFields").classList.toggle("hidden",!ill);$("certificateFields").classList.toggle("hidden",!ill);
-if(ill){$("aDate").value="";$("aTime").value="";$("aDeparture").value=""}
+let period=usesPeriod(),ill=isIllness(),leave=isLeave();
+$("appointmentFields").classList.toggle("hidden",period);
+$("illnessFields").classList.toggle("hidden",!period);
+$("periodLabel").textContent=leave?"Période de congé":"Période de maladie";
+$("accountField").classList.toggle("hidden",!leave);
+$("certificateFields").classList.toggle("hidden",!ill);
+if(period){$("aDate").value="";$("aTime").value="";$("aDeparture").value=""}
 updateAbsencePreview()
 }
 function updateDeparture(){let t=timeToMin($("aTime").value),d=timeToMin(cfg.duration);$("aDeparture").value=(t!=null&&d!=null)?minToTime(t-d):"";updateAbsencePreview()}
@@ -153,6 +164,15 @@ if(isIllness()){
  let s=$("aStart").value,e=$("aEnd").value;
  let period=s&&e?formatDate(s)+" - "+formatDate(e):"[période de maladie]";
  lines.push("Je vous informe de la maladie suivante : "+period+".");
+}else if(isLeave()){
+ let s=$("aStart").value,e=$("aEnd").value;
+ let periodText;
+ if(s&&e&&s!==e) periodText="congé du "+formatDate(s)+" au "+formatDate(e);
+ else if(s||e) periodText="congé le "+formatDate(s||e);
+ else periodText="congé le [date]";
+ lines.push("Je souhaite prendre "+periodText+" et il reste suffisamment de personnel dans le bureau pour cette journée.");
+ lines.push("D’avance merci pour la validation définitive.");
+ lines.push("Compte utilisé : "+($("aAccount").value||"[à sélectionner]")+".");
 }else{
  let date=$("aDate").value?formatDate($("aDate").value):"[date]";
  let rdv=$("aTime").value||"[heure]";
@@ -221,7 +241,7 @@ cfg={recipient:$("sRecipient").value.trim(),cc:$("sCc").value.trim(),substitute:
 localStorage.setItem("oa_cfg",JSON.stringify(cfg));populate();alert("Paramètres enregistrés.");updateAbsenceUI();updateVehiclePreview()
 }
 document.querySelectorAll(".tabs button").forEach(b=>b.onclick=()=>{document.querySelectorAll(".tabs button").forEach(x=>x.classList.remove("active"));document.querySelectorAll(".tab").forEach(x=>x.classList.add("hidden"));b.classList.add("active");$(b.dataset.tab).classList.remove("hidden");if(b.dataset.tab==="history")renderHistory()});
-["aCollab","aMotif","aDate","aTime","aStart","aEnd","aComment","aSubstitute"].forEach(id=>$(id).addEventListener("input",()=>{if(id==="aMotif")updateAbsenceUI();else if(id==="aTime")updateDeparture();else updateAbsencePreview()}));
+["aCollab","aMotif","aDate","aTime","aStart","aEnd","aAccount","aComment","aSubstitute"].forEach(id=>$(id).addEventListener("input",()=>{if(id==="aMotif")updateAbsenceUI();else if(id==="aTime")updateDeparture();else updateAbsencePreview()}));
 $("aMotif").addEventListener("change",updateAbsenceUI);$("aTime").addEventListener("change",updateDeparture);
 $("aCert").addEventListener("change",()=>{$("certName").textContent=$("aCert").files[0]?.name||"Aucun certificat sélectionné"});
 ["vCollab","vMotif","vDate","vModel","vPlate"].forEach(id=>$(id).addEventListener("input",updateVehiclePreview));
