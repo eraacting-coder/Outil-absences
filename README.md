@@ -9,3 +9,6 @@ Le cache du service worker est passé en v6.
 
 
 Version 7 : règle rendez-vous 10:30. Avant 10:30, affichage « Heure du rendez-vous » sur une ligne séparée. À partir de 10:30, affichage « Heure de départ » sur une ligne séparée, sans heure après la date.
+
+
+Version 8 : conversion automatique des listes d’adresses séparées par des points-virgules en listes séparées par des virgules lors de la préparation du mail, pour compatibilité iOS. Les paramètres existants peuvent rester inchangés. Cache PWA v8.

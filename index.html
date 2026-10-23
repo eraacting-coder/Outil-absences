@@ -187,11 +187,21 @@ return {subject,body}
 function updateVehiclePreview(){$("vPreview").textContent=vehicleText()?.body||"Remplissez le formulaire pour générer le message."}
 function formatDate(v){if(!v)return "";let d=new Date(v+"T00:00:00");return String(d.getDate()).padStart(2,"0")+"."+String(d.getMonth()+1).padStart(2,"0")+"."+d.getFullYear()}
 function recipient(){return $("aSubstitute").checked?cfg.substitute:cfg.recipient}
+function normalizeAddressList(value){
+// Accepte les anciens paramètres séparés par ; et produit une liste mailto séparée par des virgules.
+return String(value||"").split(/[;,]/).map(address=>address.trim()).filter(Boolean).map(address=>encodeURIComponent(address)).join(",");
+}
 function sendMail(to,cc,data,kind){
 if(!data){alert("Veuillez compléter les champs obligatoires.");return}
 history.unshift({when:new Date().toISOString(),kind,name:kind==="absence"?$("aCollab").value:$("vCollab").value,subject:data.subject,body:data.body,status:"Préparé"});
 localStorage.setItem("oa_history",JSON.stringify(history));renderHistory();
-const url="mailto:"+encodeURIComponent(to)+"?cc="+encodeURIComponent(cc)+"&subject="+encodeURIComponent(data.subject)+"&body="+encodeURIComponent(data.body);
+const toList=normalizeAddressList(to);
+const ccList=normalizeAddressList(cc);
+const params=[];
+if(ccList) params.push("cc="+ccList);
+params.push("subject="+encodeURIComponent(data.subject));
+params.push("body="+encodeURIComponent(data.body));
+const url="mailto:"+toList+"?"+params.join("&");
 location.href=url;
 }
 function sendAbsence(){sendMail(recipient(),$("aCc").value,absenceText(),"absence")}
